@@ -1,8 +1,19 @@
-const express = require("express");
+import express from 'express'
+import connectdb from "./src/config/db.js"
+import {config} from './src/config/index.js'
+import {usersR, todosR, labelsR} from './src/routes/index.js'
 const app = express()
+app.use(express.json())
 
-console.log(process.env.NAME);
-app.listen(process.env.port||8000, ()=>{
-	console.log("server Started");
+
+app.listen(config.port, ()=>{
+	connectdb()
+	console.log(`server Started at http://localhost:${config.port}`);
 })
+
+
+usersR(app)
+todosR(app)
+labelsR(app)
+
 
