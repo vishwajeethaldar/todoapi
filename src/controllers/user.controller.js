@@ -111,6 +111,7 @@ const userC = (()=>{
                 }
                
                 let admin =  await User.findOne({_id:adminid})
+                
                 if(admin.role!=="su"){
                     return {code:403, data:"You are not Authorised to update the role"}
                 }
@@ -147,7 +148,6 @@ const userC = (()=>{
 
 
         // Validate User Email for Registration
-
         const validate =  async(email, otp)=>{
            let isUserExist =  await User.findOne({email:email})
           
@@ -163,6 +163,24 @@ const userC = (()=>{
            return {code:200, data:"Account Verified Successfully"}
         }
 
+        const resetPassword = async(email, otp, newpassword)=>{
+           
+            let isUserExist =  await User.findOne({email:email})
+          
+            if(!isUserExist){
+             return {code:404, data:"User Not Registered"}
+            }
+     
+            if(Number(otp)!==Number(isUserExist.otp)){
+             return {code:400, data:"Incorrect OTP"}   
+            }
+
+            newpassword = await hashPwd.hash(newpassword)
+
+            User.findByIdAndUpdate(isUserExist._id, {$set:{password:newpassword}})
+            
+            return {code:200, data:"Password Updated Successfully"}
+        }
         return {
             add,
             remove,

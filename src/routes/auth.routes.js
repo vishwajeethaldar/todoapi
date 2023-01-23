@@ -1,9 +1,20 @@
 import {authC} from '../controllers/index.js'
 import {joseJwt} from '../lib/index.js'
 import { authMiddleware } from '../middleware/auth.middleware.js'
+import { Token, User } from '../models/index.js'
 
 const authRoutes = (app)=>{
 
+
+    app.post("/reset/otp", async (req, res)=>{
+        const {email} = req.body;
+        try {
+            let data = await authC.sendOtp(email, "OTP to reset your account password", "OTP is ");
+            return res.status(data.code).send(data.data);
+        } catch (error) {
+            return res.send(error.message)
+        }
+    })
      app.post("/login", async (req, res)=>{
 
         const {email, password} =  req.body;
@@ -13,8 +24,7 @@ const authRoutes = (app)=>{
         
             if(data.code===200){
                 let decodedToken  = await joseJwt.verify(data.data,"access")
-               
-                 res.cookie("token", data.data, {maxAge:decodedToken.payload.exp, secure: false, httpOnly:true});  //,,
+                res.cookie("token", data.data, {maxAge:decodedToken.payload.exp, secure: false, httpOnly:true});  //,,
                 return res.status(data.code).send( {...decodedToken.payload})
             }else{
                 return  res.status(data.code).send(data.data)
@@ -41,7 +51,24 @@ const authRoutes = (app)=>{
     app.get("/refresh", async(req, res)=>{
         try {
             let token = req.cookies.token
-            return res.send(token)
+            let {userid} = req.body
+
+            let decoded = await joseJwt.verify(token, "access")
+            if(decoded){
+               return res.send({...decoded.payload})        
+            }
+
+            let refreshToken = await Token.findOne({user:userid})
+            decoded = await joseJwt.verify(refreshToken.refreshToken, "refreshs")
+            if(!decoded){
+                return res.status(401).send("Session out! please login again")
+            }
+
+            let user = await User.findOne({_id:userid})
+            let payload = {id:user._id, role:user.role, email:user.email}
+            token = await joseJwt.sing(payload, "access")
+
+            return res.status(200).send({...token.payload})
         } catch (error) {
             return res.status(500).send(error.message)
         }

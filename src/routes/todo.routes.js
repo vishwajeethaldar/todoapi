@@ -1,7 +1,9 @@
 import {todoC} from '../controllers/index.js'
+import { authMiddleware } from '../middleware/auth.middleware.js'
+
 const todos = (app)=>{
     
-    app.get('/todos/', async(req, res)=>{
+    app.get('/todos/', authMiddleware, async(req, res)=>{
         try {
             let data = await todoC.getAll()
             return res.status(data.code).send(data.data)
@@ -10,7 +12,7 @@ const todos = (app)=>{
         }
     })
 
-    app.get("/todos/todo", async(req, res)=>{
+    app.get("/todos/todo",authMiddleware, async(req, res)=>{
         const {id} = req.body;
         try {
             let data = await todoC.getOne(id)
@@ -20,7 +22,7 @@ const todos = (app)=>{
         }
     })
       
-    app.post('/todos/add', async(req, res)=>{
+    app.post('/todos/add', authMiddleware, async(req, res)=>{
         try {
             const {title, description, color, labelid, userid}  = req.body;
             const resData  =  await todoC.add(title, description, color, labelid, userid) 
@@ -31,7 +33,7 @@ const todos = (app)=>{
     })
     
 
-    app.delete("/todos/delete", async(req, res)=>{
+    app.delete("/todos/delete",authMiddleware, async(req, res)=>{
         const {id}  = req.body;
         try {
             const resData  =  await todoC.remove(id) 
@@ -42,7 +44,7 @@ const todos = (app)=>{
 
     })
 
-    app.patch("/todos/update/todo", async(req, res)=>{
+    app.patch("/todos/update/todo",authMiddleware, async(req, res)=>{
         const {id, title,description, color}  = req.body;
         try {
             const resData  =  await todoC.update(id, title,description, color)
@@ -52,7 +54,7 @@ const todos = (app)=>{
         }
     })
 
-    app.patch("/todos/update/status", async(req, res)=>{
+    app.patch("/todos/update/status", authMiddleware, async(req, res)=>{
         const {id, status}  = req.body;
         try {
             const resData  =  await todoC.updateState(id, status);
@@ -61,7 +63,6 @@ const todos = (app)=>{
             return res.status(500).send(error.message)
         }
     })
-
 
 }
 
