@@ -36,7 +36,7 @@ const authRoutes = (app)=>{
     })
 
 
-    app.post("/logout", async (req, res)=>{
+    app.delete("/logout", async (req, res)=>{
        try {
             const {userid} =  req.body;
             let token = req.cookies.token
@@ -49,7 +49,7 @@ const authRoutes = (app)=>{
     })
 
 
-    app.get("/refresh", async(req, res)=>{
+    app.post("/refresh", async(req, res)=>{
         try {
             let token = req.cookies.token
             let {userid} = req.body

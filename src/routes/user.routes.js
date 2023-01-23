@@ -35,7 +35,6 @@ const users = (app)=>{
     app.delete("/users/delete",authMiddleware, async(req, res)=>{
         const {userid} = req.body;
        try {
-         
             let data = await userC.remove(userid)
             return res.status(data.code).send(data.data)
        } catch (error) {
