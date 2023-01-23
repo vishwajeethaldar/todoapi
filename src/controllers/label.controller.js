@@ -90,7 +90,7 @@ const labelC = (()=>{
 
     const getAll = async ()=>{
         try{
-            let data  = await Label.find();   
+            let data  = await Label.find({},{user:0});   
             return {code:200, data:data}
        }catch(e){
            return {code:500, data:`Interval Server Error! ${e.message}`}

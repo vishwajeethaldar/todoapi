@@ -13,6 +13,7 @@ const userC = (()=>{
                 
                 let newUser = new User({name, email, password, role})
                 await newUser.save();
+                newUser = newUser.findOne({email:email}, {password:0,role:0,_id:0,__V:0})
                 return {code:200, data:newUser}
 
             } catch (error) {
@@ -39,7 +40,6 @@ const userC = (()=>{
 
         const updateProfile = async (userid, name, email,avatar)=>{
             try {
-                
                 if(!userid){
                     return {code:400, data:"user is is required to update"}
                 }
@@ -51,6 +51,7 @@ const userC = (()=>{
                 }
 
                 await User.findByIdAndUpdate(userid, {$set:{name:name||user.name, email:email||user.email, avatar:avatar||user.avatar}})
+                user = await User.findOne({_id:userid}, {password:0,role:0,_id:0,__V:0})
                 return {code:200, data:user}
 
             } catch (error) {
@@ -72,7 +73,8 @@ const userC = (()=>{
                     newPassword = await hashPwd.hash(newPassword)
 
                     User.findByIdAndUpdate(userid, {$set:{password:newPassword}})
-                    return {code:200, data:"Password Updated Successfully"}
+                    user = await User.findOne({_id:userid}, {password:0,role:0,_id:0,__V:0})
+                    return {code:200, data:user}
 
                 } catch (error) {
                     return {code:500, data:`Internal Sever Error! ${error.message}`}
@@ -96,10 +98,9 @@ const userC = (()=>{
                     return {code:403, data:"You are not Authorised to update the role"}
                 }
 
-                console.log(userid, newrole);
                 await User.findOneAndUpdate({_id:userid}, {$set:{role:newrole}})
-
-                return {code:200, data:"New Role Updated Successfully"}
+                 user = await User.findOne({_id:userid}, {password:0,role:0,_id:0,__V:0})
+                return {code:200, data:user}
             } catch (error) {
                 return {code:500, data:`Internal Sever Error! ${error.message}`}
             }
@@ -107,7 +108,7 @@ const userC = (()=>{
 
         const getOne = async (userid)=>{
             try {
-                let user = await User.findOne({_id:userid});
+                let user = await User.findOne({_id:userid}, {password:0,role:0,_id:0,__V:0});
                 if(!user){
                     return {code:404, data:"user not exists"}
                 }
@@ -120,7 +121,7 @@ const userC = (()=>{
 
         const getAll = async ()=>{
             try {
-                let users = await User.find();
+                let users = await User.find({}, {password:0});
                 return {code:200, data:users}
             } catch (error) {
                 return {code:500, data:`Internal Sever Error! ${error.message}`}

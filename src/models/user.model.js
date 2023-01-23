@@ -9,7 +9,7 @@ const usersSchema  =  new mongoose.Schema({
     todoLabels:{type:[mongoose.Schema.Types.ObjectId], default:[], ref:"label"},
     todos:{type:[mongoose.Schema.Types.ObjectId], default:[], ref:"todo"},
     role:{type:String, enum:["admin","user","su"]}
-})
+},{timestamps:true})
 
 const User = mongoose.models.user||mongoose.model('user', usersSchema)
 export default User;

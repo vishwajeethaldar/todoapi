@@ -21,7 +21,7 @@ const users = (app)=>{
         }
     })
 
-    app.get("/users/allusers", async(req, res)=>{
+    app.get("/users/", async(req, res)=>{
         try {
             let data = await userC.getAll()
             return res.status(data.code).send(data.data)
