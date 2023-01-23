@@ -1,5 +1,5 @@
 import {User, Label, Todo} from '../models/index.js';
-import {hashPwd,sendEmail} from '../lib/index.js';
+import {hashPwd,sendEmail, joseJwt} from '../lib/index.js';
 import { config } from '../config/index.js';
 
 const authC = (()=>{
@@ -21,7 +21,17 @@ const authC = (()=>{
         }
 
         let varifyPassword = await hashPwd.verify(existuser.password, password)
-        return {code:200, data:"Logged in Successfull"}
+        
+        if(!varifyPassword){
+            return {code:401, data:"Invalid credintials email or password"}
+        }
+
+        let payload = {email:email,id:existuser._id }
+        let accessToken  = joseJwt(payload, "access")
+        let refreshToken  = joseJwt(payload, "refresh")
+
+        
+        return {code:200, data:accessToken}
     }
 
     const signOut = async(userid)=>{

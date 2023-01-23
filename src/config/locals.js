@@ -13,7 +13,11 @@ let configs = (function (){
     let Z_Mail_Port = process.env.Z_Mail_Port;
     let Z_Sec_Type = process.env.Z_Sec_Type;
 
-    return {mongouri, port,Z_Mail,Z_Mail_Password,Z_Mail_Host,Z_Mail_Port,Z_Sec_Type};
+    // JWT Keys
+    let jwt_p = process.env.JWTSECRETPRIVATE;
+    let jwt_o = process.env.JSWSECRET;
+
+    return {mongouri, port,Z_Mail,Z_Mail_Password,Z_Mail_Host,Z_Mail_Port,Z_Sec_Type, jwt_p, jwt_o};
 })()
 
 
