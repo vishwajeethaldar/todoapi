@@ -108,7 +108,7 @@ const userC = (()=>{
 
         const getOne = async (userid)=>{
             try {
-                let user = await User.findOne({_id:userid}, {password:0,role:0,_id:0,__V:0});
+                let user = await User.findOne({_id:userid}, {password:0,role:0,_id:0,__V:0}).populate("todos").populate("todoLabels");
                 if(!user){
                     return {code:404, data:"user not exists"}
                 }
@@ -121,7 +121,7 @@ const userC = (()=>{
 
         const getAll = async ()=>{
             try {
-                let users = await User.find({}, {password:0});
+                let users = await User.find({}, {password:0}).populate("todos").populate("todoLabels");
                 return {code:200, data:users}
             } catch (error) {
                 return {code:500, data:`Internal Sever Error! ${error.message}`}
