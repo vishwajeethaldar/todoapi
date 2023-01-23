@@ -45,8 +45,8 @@ const userC = (()=>{
                 if(!user){
                     return {code:404, data:"user not exists"}
                 }
-                await Label.deleteMany({user:userid, id:{$in:user.todoLabels}})
-                await Todo.deleteMany({user:userid, id:{$in:user.todos}})
+                await Label.deleteMany({user:userid, _id:{$in:user.todoLabels}})
+                await Todo.deleteMany({user:userid, _id:{$in:user.todos}})
                 await User.findByIdAndDelete(userid)
                 return {code:200, data:"Deleted Successfully"}
 
@@ -163,8 +163,13 @@ const userC = (()=>{
            return {code:200, data:"Account Verified Successfully"}
         }
 
+        // reset Password
         const resetPassword = async(email, otp, newpassword)=>{
            
+            if(!email||!otp||!newpassword){
+                return {code:400, data:"email, otp, password all are required"}
+            }
+
             let isUserExist =  await User.findOne({email:email})
           
             if(!isUserExist){
@@ -181,6 +186,8 @@ const userC = (()=>{
             
             return {code:200, data:"Password Updated Successfully"}
         }
+
+
         return {
             add,
             remove,
@@ -189,7 +196,9 @@ const userC = (()=>{
             getAll,
             updatePassword,
             updateRole,
-            validate
+            validate,
+            resetPassword
+
         }
 })()
 

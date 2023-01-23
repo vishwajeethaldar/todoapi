@@ -54,7 +54,7 @@ const users = (app)=>{
         }
      })
 
-     app.patch("/users/profile/updatepassword", authMiddleware, async(req, res)=>{
+    app.patch("/users/profile/updatepassword", authMiddleware, async(req, res)=>{
         const {userid, newpassword} = req.body;
         try {
              let data = await userC.updatePassword(userid,newpassword)
@@ -84,6 +84,15 @@ const users = (app)=>{
         }
      })
 
+     app.patch("/users/account/resetpassword", async(req, res)=>{
+        let {email, otp, password} = req.body
+        try {
+            let data = await userC.resetPassword(email, otp, password)
+            return res.status(data.code).send(data.data)
+        } catch (error) {
+            return res.status(500).send(error.message)
+        }
+     })
 }
 
 export default users 

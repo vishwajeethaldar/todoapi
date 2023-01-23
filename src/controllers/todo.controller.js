@@ -30,7 +30,7 @@ const todoC = (()=>{
 
             await Label.findByIdAndUpdate(todo.label, {$pull:{todos:todo._id}});
             await User.findByIdAndUpdate(todo.user, {$pull:{todos:todo._id}});
-            await Todo.findByIdAndDelete(todoid);
+            await Todo.findByIdAndDelete(todoId);
             return {code:200, data:"Todo Deleted Successfully"}
 
         } catch (error) {

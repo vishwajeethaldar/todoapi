@@ -15,13 +15,13 @@ const authRoutes = (app)=>{
             return res.send(error.message)
         }
     })
+
+
      app.post("/login", async (req, res)=>{
 
         const {email, password} =  req.body;
         try {
-           
             let data = await authC.signIn(email, password);
-        
             if(data.code===200){
                 let decodedToken  = await joseJwt.verify(data.data,"access")
                 res.cookie("token", data.data, {maxAge:decodedToken.payload.exp, secure: false, httpOnly:true});  //,,
@@ -48,27 +48,15 @@ const authRoutes = (app)=>{
        }
     })
 
+
     app.get("/refresh", async(req, res)=>{
         try {
             let token = req.cookies.token
             let {userid} = req.body
 
-            let decoded = await joseJwt.verify(token, "access")
-            if(decoded){
-               return res.send({...decoded.payload})        
-            }
-
-            let refreshToken = await Token.findOne({user:userid})
-            decoded = await joseJwt.verify(refreshToken.refreshToken, "refreshs")
-            if(!decoded){
-                return res.status(401).send("Session out! please login again")
-            }
-
-            let user = await User.findOne({_id:userid})
-            let payload = {id:user._id, role:user.role, email:user.email}
-            token = await joseJwt.sing(payload, "access")
-
-            return res.status(200).send({...token.payload})
+            let data = await authC.generateRefreshToken(token, userid);
+            res.cookie("token", data.token, {maxAge:decoded.exp, secure:false, httpOnly:true})
+            return res.status(data.code).send(data.decoded)
         } catch (error) {
             return res.status(500).send(error.message)
         }

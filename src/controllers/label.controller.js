@@ -27,7 +27,6 @@ const labelC = (()=>{
              await User.updateOne({_id:label.user}, {$pull:{todos:labelid}})  
              await Todo.deleteMany({user:label.user, _id:{$in:label.todos}})
              await Label.findByIdAndDelete(labelid)
-            
              return {code:200, data:'deleted Successfully'}
         }catch(e){
             return {code:500, data:`Interval Server Error! ${e.message}`}
