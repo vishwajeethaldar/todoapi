@@ -1,21 +1,38 @@
 import {User, Label, Todo} from '../models/index.js';
-import {hashPwd} from '../lib/index.js';
+import {hashPwd,sendEmail} from '../lib/index.js';
+import { config } from '../config/index.js';
 
 const userC = (()=>{
 
         const add = async (name, email, password, role="user")=>{
             try {
-
+                
                 if(!name||!email||!password){
                     return {code:400, data:"name, email and password is required"}
                 }
-                password = await hashPwd.hash(password)
                 
-                let newUser = new User({name, email, password, role})
-                await newUser.save();
-                newUser = newUser.findOne({email:email}, {password:0,role:0,_id:0,__V:0})
-                return {code:200, data:newUser}
+                let isUserExist = await User.findOne({email:email});
 
+                if(isUserExist){
+                    return {code:409, data:"You are Already Registered please login with your creadintials"}
+                }
+
+                password = await hashPwd.hash(password)
+
+                // Generating an OTP
+                let otp = Math.floor(Math.random()*(999999-111111)+111111);
+               
+                // Send Email...
+                let emailStatus = await sendEmail(email, "Account Activation Request", `OTP to verify your email ${otp}`)
+               
+                if(emailStatus.status){
+                    let newUser = new User({name, email, password, role ,otp});
+                    await newUser.save();
+                    return {code:200, data:"OTP has been sent to your register email."}
+                }else{
+                    return {code:400, data:"Email Error!"}
+                }
+               
             } catch (error) {
                 return {code:500, data:`Internal Sever Error! ${error.message}`}
             }
@@ -31,8 +48,8 @@ const userC = (()=>{
                 await Label.deleteMany({user:userid, id:{$in:user.todoLabels}})
                 await Todo.deleteMany({user:userid, id:{$in:user.todos}})
                 await User.findByIdAndDelete(userid)
-                
                 return {code:200, data:"Deleted Successfully"}
+
             } catch (error) {
                 return {code:500, data:`Internal Sever Error! ${error.message}`}
             }
@@ -128,6 +145,24 @@ const userC = (()=>{
             }
         }
 
+
+        // Validate User Email for Registration
+
+        const validate =  async(email, otp)=>{
+           let isUserExist =  await User.findOne({email:email})
+          
+           if(!isUserExist){
+            return {code:404, data:"User Not Registered"}
+           }
+    
+           if(Number(otp)!==Number(isUserExist.otp)){
+            return {code:400, data:"Incorrect OTP"}   
+           }
+
+           await User.findOneAndUpdate({email:email}, {$set:{otp:"",accountStatus:"active"}})
+           return {code:200, data:"Account Verified Successfully"}
+        }
+
         return {
             add,
             remove,
@@ -135,7 +170,8 @@ const userC = (()=>{
             getOne,
             getAll,
             updatePassword,
-            updateRole
+            updateRole,
+            validate
         }
 })()
 

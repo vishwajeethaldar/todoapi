@@ -72,6 +72,16 @@ const users = (app)=>{
         }
      })
 
+     app.patch("/users/account/validate", async(req, res)=>{
+        const {email, otp} = req.body;
+        try {
+             let data = await userC.validate(email, otp)
+             return res.status(data.code).send(data.data)
+        } catch (error) {
+             return res.status(500).send(error.message)
+        }
+     })
+
 }
 
 export default users 
