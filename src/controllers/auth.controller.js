@@ -1,8 +1,9 @@
-import {User, Label, Todo} from '../models/index.js';
+import {User, Token, Blockedtoken} from '../models/index.js';
 import {hashPwd,sendEmail, joseJwt} from '../lib/index.js';
 import { config } from '../config/index.js';
 
 const authC = (()=>{
+
     const signIn = async(email, password)=>{
         
         let existuser = await User.findOne({email:email});
@@ -27,15 +28,33 @@ const authC = (()=>{
         }
 
         let payload = {email:email,id:existuser._id }
-        let accessToken  = joseJwt(payload, "access")
-        let refreshToken  = joseJwt(payload, "refresh")
+        let accessToken  = await joseJwt.sing(payload, "access")
+        let refreshToken  = await joseJwt.sing(payload, "refresh")
 
-        
+        let token = new Token({user:existuser._id, refreshToken:refreshToken})
+        await token.save();
         return {code:200, data:accessToken}
     }
 
-    const signOut = async(userid)=>{
-            
+    const signOut = async(userid, accessToken)=>{
+        
+        let user = await User.findOne({_id:userid})
+        
+        if(!user){
+            return {code:404, data:"user not exists"}
+        }
+        await Token.findOneAndDelete({user:userid})
+    
+        let blockedToken = await Blockedtoken.findOne({user:userid})
+
+        if(blockedToken){
+            await Blockedtoken.findOneAndUpdate({user:userid}, {$push:{access:accessToken}})
+        }else{
+            blockedToken = await Blockedtoken.create({user:userid})
+            await Blockedtoken.findOneAndUpdate({user:userid}, {$push:{access:accessToken}})
+        }
+
+        return {code:200, data:"Logged out successfully"}
     }
 
     const sendOtp = async (email, subject, body)=>{
@@ -60,15 +79,11 @@ const authC = (()=>{
        }
     }
 
-    const validateOtp = ()=>{
-        
-    }
 
     return {
         signIn,
         signOut,
-        sendOtp,
-        validateOtp
+        sendOtp
     }
 })
 
