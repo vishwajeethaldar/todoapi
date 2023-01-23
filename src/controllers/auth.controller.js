@@ -27,7 +27,7 @@ const authC = (()=>{
             return {code:401, data:"Invalid credintials email or password"}
         }
 
-        let payload = {email:email,id:existuser._id }
+        let payload = {email:email,id:existuser._id, role:existuser.role}
         let accessToken  = await joseJwt.sing(payload, "access")
         let refreshToken  = await joseJwt.sing(payload, "refresh")
 
@@ -85,7 +85,7 @@ const authC = (()=>{
         signOut,
         sendOtp
     }
-})
+})()
 
 
 export default authC;

@@ -5,5 +5,5 @@ const tokenSchema =  new mongoose.Schema({
     refreshToken:{type:String, default:""}
 })
 
-const Token = mongoose.model("token", tokenSchema)
+const Token = mongoose.models.token || mongoose.model("token", tokenSchema)
 export default Token;

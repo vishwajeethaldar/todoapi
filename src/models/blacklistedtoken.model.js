@@ -5,5 +5,5 @@ const blockedTokenSchema =  new mongoose.Schema({
     access:{type:[String], default:[]}
 })
 
-const Blockedtoken = mongoose.model("token", blockedTokenSchema)
+const Blockedtoken = mongoose.model("blockedtoken", blockedTokenSchema)
 export default Blockedtoken;
